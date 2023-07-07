@@ -36,22 +36,22 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     setConfig({
       network: {
-        id: 4000003,
-        name: 'ALT-Zero',
-        network: 'ALT-Zero',
+        id: 4000005,
+        name: 'ALT Epochless',
+        network: 'ALT-epochless',
         nativeCurrency: {
           decimals: 18,
-          name: 'Ethereum',
-          symbol: 'ETH',
+          name: 'ALT',
+          symbol: 'ALT',
         },
         rpcUrls: {
-          public: { http: ['https://zero.alt.technology'] },
-          default: { http: ['https://zero.alt.technology'] },
+          public: { http: ['http://epochless.alt.technology'] },
+          default: { http: ['http://epochless.alt.technology'] },
         },
         blockExplorers: {
           default: {
             name: 'explorer',
-            url: 'https://zero-explorer.alt.technology',
+            url: 'http://epochless-explorer.alt.technology',
           },
         },
       },
