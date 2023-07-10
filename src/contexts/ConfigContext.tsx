@@ -53,7 +53,7 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           },
         },
       },
-      contractAddress: '0xAE0DAa9bFC50f03ce23D30c796709a58470b5F42',
+      contractAddress: '0xca1ba94a91B6549d67B475Db88c3e035c5958B5a',
     });
   }, []);
 

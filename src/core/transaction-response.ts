@@ -10,7 +10,7 @@ export class TransactionResponse {
   public pollingInterval: number;
   public timeout: number;
 
-  constructor(url: string, transactionHash: string, pollingInterval = 50, timeout = 100 * 1000) {
+  constructor(url: string, transactionHash: string, pollingInterval = 10, timeout = 100 * 1000) {
     this._transactionHash = transactionHash;
     this._url = url;
     this.pollingInterval = pollingInterval;
