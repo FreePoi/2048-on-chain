@@ -6,14 +6,14 @@ import { useMutation } from 'react-query';
 
 import EnsureNetworkButton from '../../components/EnsureNetworkButton';
 import { TwentyFortyEight } from '../../core/abis';
+import { Game2048 } from '../../core/game2048';
 import { getLogArgs } from '../../core/utils';
 import useAlertTransaction from '../../hooks/useAlertTransaction';
-import { useGame2048 } from '../../hooks/useGame2048';
-import { useOperator } from '../../hooks/useOperator';
 
-const StartGame: React.FC<{ onGameStarted: (gameId: number) => void }> = ({ onGameStarted }) => {
-  const { operatorInfo, signatureValid } = useOperator();
-  const game2048 = useGame2048(signatureValid ? operatorInfo?.privateKey : undefined);
+const StartGame: React.FC<{
+  game2048: Game2048 | null;
+  onGameStarted: (gameId: number) => void;
+}> = ({ game2048, onGameStarted }) => {
   const { alertConfirmed, alertFailed } = useAlertTransaction();
 
   const { isLoading, mutate: startGame } = useMutation<string | undefined, any, void>({
@@ -22,12 +22,12 @@ const StartGame: React.FC<{ onGameStarted: (gameId: number) => void }> = ({ onGa
         return;
       }
 
-      console.log('game2048', game2048);
-
       const tx = await game2048.startGame();
       const receipt = await tx.wait();
       const iface = new ethers.utils.Interface(TwentyFortyEight.abi);
       const gameId: BigNumber = getLogArgs(receipt.logs, iface, 'gameStarted').gameId;
+
+      console.log('new gameId', gameId.toNumber());
 
       onGameStarted(gameId.toNumber());
 

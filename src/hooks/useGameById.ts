@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { useGame2048 } from './useGame2048';
-import { useOperator } from './useOperator';
+import { Game2048 } from './../core/game2048';
 
-export const useGameBoardById = (gameId: number) => {
+export const useGameBoardById = (game2048: Game2048 | null, gameId: number) => {
   const [boardState, setBoardState] = useState<{
     isLost: boolean;
     isWon: boolean;
@@ -13,16 +12,10 @@ export const useGameBoardById = (gameId: number) => {
     isWon: false,
     view: new Array(16).fill(0),
   });
-  const { operatorInfo, signatureValid } = useOperator();
-  const game2048 = useGame2048(signatureValid ? operatorInfo?.privateKey : undefined);
-  const updateView = useCallback(async () => {
-    console.log(game2048, gameId);
-
+  const getBoard = useCallback(async () => {
     if (!game2048 || gameId <= 0) {
       return;
     }
-
-    console.log('gameID', gameId);
 
     const [isLost, isWon, view] = await Promise.all([
       game2048.isLost(gameId),
@@ -35,12 +28,19 @@ export const useGameBoardById = (gameId: number) => {
       isWon,
       view,
     });
-    console.log('view', view);
   }, [game2048, gameId]);
 
   useEffect(() => {
-    updateView();
-  }, [gameId, updateView]);
+    getBoard();
+  }, [gameId, getBoard]);
+
+  const updateView = useCallback((view: number[]) => {
+    setBoardState({
+      isLost: false,
+      isWon: false,
+      view,
+    });
+  }, []);
 
   return useMemo(() => ({ boardState, updateView }), [boardState, updateView]);
 };

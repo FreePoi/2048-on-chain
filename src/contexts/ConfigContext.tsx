@@ -1,8 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Chain } from 'wagmi';
 
-import { useCustomSearchParams } from '../hooks/useCustomSearchParams';
-
 interface Context {
   network: Chain;
   contractAddress: string;
@@ -36,26 +34,26 @@ export const ConfigProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     setConfig({
       network: {
-        id: 4000003,
-        name: 'ALT-Zero',
-        network: 'ALT-Zero',
+        id: 4000005,
+        name: 'Epochless',
+        network: 'Altlayer epochless',
         nativeCurrency: {
           decimals: 18,
-          name: 'Ethereum',
-          symbol: 'ETH',
+          name: 'ALT',
+          symbol: 'ALT',
         },
         rpcUrls: {
-          public: { http: ['https://zero.alt.technology'] },
-          default: { http: ['https://zero.alt.technology'] },
+          public: { http: ['https://epochless.alt.technology'] },
+          default: { http: ['https://epochless.alt.technology'] },
         },
         blockExplorers: {
           default: {
             name: 'explorer',
-            url: 'https://zero-explorer.alt.technology',
+            url: 'https://epochless-explorer.alt.technology',
           },
         },
       },
-      contractAddress: '0x87b80DEeBd17B4299A8bCC5dA3AdFFCD2f6D4bDf',
+      contractAddress: '0xAE0DAa9bFC50f03ce23D30c796709a58470b5F42',
     });
   }, []);
 

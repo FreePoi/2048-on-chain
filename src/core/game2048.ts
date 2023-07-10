@@ -1,59 +1,47 @@
-import type { Signer } from '@ethersproject/abstract-signer';
-import type { Provider, TransactionResponse } from '@ethersproject/providers';
-
 import { BigNumber } from '@ethersproject/bignumber';
+import { Wallet } from 'ethers';
 
 import { TwentyFortyEight } from './abis';
-import { BaseContract } from './base';
-import { assert, callMethod } from './utils';
+import { BaseContract, NonceManager } from './base';
+import { assert } from './utils';
 
 export class Game2048 extends BaseContract {
-  constructor(address: string, signerOrProvider: Signer | Provider, abi = TwentyFortyEight.abi) {
-    super(address, signerOrProvider, abi);
+  constructor(
+    address: string,
+    wallet: Wallet,
+    rpcUrl: string,
+    nonceManager: NonceManager,
+    abi = TwentyFortyEight.abi
+  ) {
+    super(address, wallet, rpcUrl, nonceManager, abi);
   }
 
-  async startGame(): Promise<TransactionResponse> {
-    const signer = this.signer;
-
-    assert(signer, 'no signer provided');
-
-    return callMethod(this.contract, 'startGame', []);
+  async startGame() {
+    return this.callMethod(this.contract, 'startGame', []);
   }
 
-  async moveLeft(gameId: number): Promise<TransactionResponse> {
+  async moveLeft(gameId: number) {
     assert(BigNumber.from(gameId).gt(0), 'gameId should be greater than 0');
-    const signer = this.signer;
 
-    assert(signer, 'no signer provided');
-
-    return callMethod(this.contract, 'moveLeft', [gameId]);
+    return this.callMethod(this.contract, 'moveLeft', [gameId]);
   }
 
-  async moveRight(gameId: number): Promise<TransactionResponse> {
+  async moveRight(gameId: number) {
     assert(BigNumber.from(gameId).gt(0), 'gameId should be greater than 0');
-    const signer = this.signer;
 
-    assert(signer, 'no signer provided');
-
-    return callMethod(this.contract, 'moveRight', [gameId]);
+    return this.callMethod(this.contract, 'moveRight', [gameId]);
   }
 
-  async moveUp(gameId: number): Promise<TransactionResponse> {
+  async moveUp(gameId: number) {
     assert(BigNumber.from(gameId).gt(0), 'gameId should be greater than 0');
-    const signer = this.signer;
 
-    assert(signer, 'no signer provided');
-
-    return callMethod(this.contract, 'moveUp', [gameId]);
+    return this.callMethod(this.contract, 'moveUp', [gameId]);
   }
 
-  async moveDown(gameId: number): Promise<TransactionResponse> {
+  async moveDown(gameId: number) {
     assert(BigNumber.from(gameId).gt(0), 'gameId should be greater than 0');
-    const signer = this.signer;
 
-    assert(signer, 'no signer provided');
-
-    return callMethod(this.contract, 'moveDown', [gameId]);
+    return this.callMethod(this.contract, 'moveDown', [gameId]);
   }
 
   isLost(gameId: number): Promise<boolean> {
