@@ -1,66 +1,61 @@
-import type { TransactionResponse } from '@ethersproject/providers';
+import type { TransactionResponse } from '../../core/transaction-response';
 
 import { LoadingButton } from '@mui/lab';
 import { Box, Grid } from '@mui/material';
+import { BigNumber, ethers } from 'ethers';
 import { useCallback } from 'react';
-import { useLocalStorage } from 'usehooks-ts';
 import { useMutation } from 'wagmi';
 
+import { TwentyFortyEight } from '../../core/abis';
+import { Game2048 } from '../../core/game2048';
+import { getLogArgs } from '../../core/utils';
 import useAlertTransaction from '../../hooks/useAlertTransaction';
-import { useGame2048 } from '../../hooks/useGame2048';
-import { useOperator } from '../../hooks/useOperator';
+import { useGameId } from '../../hooks/useGameId';
 
 type Direction = 'left' | 'right' | 'top' | 'down';
 
-const Controller: React.FC<{ onUpdateView: () => void }> = ({ onUpdateView }) => {
-  const { operatorInfo, signatureValid } = useOperator();
-  const game2048 = useGame2048(signatureValid ? operatorInfo?.privateKey : undefined);
-  const [gameId] = useLocalStorage(`game.id.${operatorInfo?.privateKey}`, -1);
+const Controller: React.FC<{
+  game2048: Game2048 | null;
+  onUpdateView: (view: number[]) => void;
+}> = ({ game2048, onUpdateView }) => {
+  const [gameId] = useGameId();
   const { alertFailed } = useAlertTransaction();
-  const { isLoading, mutate: move } = useMutation<any, any, any>({
+  const { isLoading, mutate: move } = useMutation<number[], unknown, Direction>({
     mutationFn: useCallback(
       async (direction: Direction) => {
         if (!game2048) {
-          return;
+          throw new Error(`game2048: ${game2048}`);
         }
 
         let tx: TransactionResponse;
 
+        console.time('send move');
+
         if (direction === 'left') {
-          console.time('send moveLeft');
           tx = await game2048.moveLeft(gameId);
-          console.timeEnd('send moveLeft');
-          console.time('wait moveLeft');
-          await tx.wait();
-          console.timeEnd('wait moveLeft');
         } else if (direction === 'right') {
-          console.time('send moveRight');
           tx = await game2048.moveRight(gameId);
-          console.timeEnd('send moveRight');
-          console.time('wait moveRight');
-          await tx.wait();
-          console.timeEnd('wait moveRight');
         } else if (direction === 'top') {
-          console.time('send moveUp');
           tx = await game2048.moveUp(gameId);
-          console.timeEnd('send moveUp');
-          console.time('wait moveUp');
-          await tx.wait();
-          console.timeEnd('wait moveUp');
         } else {
-          console.time('send moveDown');
           tx = await game2048.moveDown(gameId);
-          console.timeEnd('send moveDown');
-          console.time('wait moveDown');
-          await tx.wait();
-          console.timeEnd('wait moveDown');
         }
+
+        console.timeEnd('send move');
+        console.time('wait move');
+
+        const receipt = await tx.wait();
+        const iface = new ethers.utils.Interface(TwentyFortyEight.abi);
+        const boardView: BigNumber[] = getLogArgs(receipt.logs, iface, 'NewBoardView').boardView;
+
+        console.timeEnd('wait move');
+
+        return boardView.map(number => number.toNumber());
       },
       [game2048, gameId]
     ),
-    onSuccess() {
-      onUpdateView();
-      // alertConfirmed(hash);
+    onSuccess(boardView) {
+      onUpdateView(boardView);
     },
     onError(e: any) {
       console.error(e);

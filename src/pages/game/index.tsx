@@ -1,12 +1,13 @@
 import { Box, Button, Stack, Typography } from '@mui/material';
 import { ethers } from 'ethers';
 import { useCallback } from 'react';
-import { useLocalStorage } from 'usehooks-ts';
 import { useAccount, useSignMessage } from 'wagmi';
 
 import { Board } from '../../components/Board/Board';
 import { tileCount } from '../../components/Board/models/Board';
+import { useGame2048 } from '../../hooks/useGame2048';
 import { useGameBoardById } from '../../hooks/useGameById';
+import { useGameId } from '../../hooks/useGameId';
 import { useOperator } from '../../hooks/useOperator';
 import Controller from './Controller';
 import StartGame from './StartGame';
@@ -21,8 +22,9 @@ const Game: React.FC = () => {
   const { address } = useAccount();
   const sign = useSignMessage();
   const { operatorInfo, signatureValid, updateOperatorInfo } = useOperator();
-  const [gameId, updateGameId] = useLocalStorage(`game.id.${operatorInfo?.privateKey}`, -1);
-  const { boardState, updateView } = useGameBoardById(gameId);
+  const [gameId, updateGameId] = useGameId();
+  const game2048 = useGame2048();
+  const { boardState, updateView } = useGameBoardById(game2048, gameId);
 
   const signup = useCallback(() => {
     if (!signatureValid && sign.signMessageAsync && address) {
@@ -39,8 +41,6 @@ const Game: React.FC = () => {
     }
   }, [address, sign, signatureValid, updateOperatorInfo]);
 
-  // console.log('gameId', gameId, 'boardState', boardState);
-
   return (
     <Box pb={4}>
       {!signatureValid ? (
@@ -48,7 +48,7 @@ const Game: React.FC = () => {
           <Button onClick={signup}>Sign Up</Button>
         </Box>
       ) : gameId < 0 || boardState.view.every(number => number === 0) ? (
-        <StartGame onGameStarted={updateGameId} />
+        <StartGame game2048={game2048} onGameStarted={updateGameId} />
       ) : (
         <>
           <Typography>
@@ -65,7 +65,7 @@ const Game: React.FC = () => {
                 mergeWith: number,
               }))}
             />
-            <Controller onUpdateView={updateView} />
+            <Controller game2048={game2048} onUpdateView={updateView} />
           </Stack>
         </>
       )}

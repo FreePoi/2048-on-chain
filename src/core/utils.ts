@@ -1,5 +1,4 @@
 import type { CallOverrides } from '@ethersproject/contracts';
-import type { TransactionResponse } from '@ethersproject/providers';
 
 import { getAddress } from '@ethersproject/address';
 import { BigNumber } from '@ethersproject/bignumber';
@@ -9,7 +8,7 @@ import { JsonRpcProvider, JsonRpcSigner } from '@ethersproject/providers';
 import { BigNumberish, ethers } from 'ethers';
 import { formatUnits, Interface, parseUnits, Result } from 'ethers/lib/utils.js';
 
-import { CallError, ContractError, OutOfGasError, UserRejectError } from './errors';
+import { CallError, OutOfGasError } from './errors';
 
 // returns the checksummed address if the address is valid, otherwise returns false
 export function isAddress(value: string): string | false {
@@ -106,35 +105,12 @@ export async function getGasEstimate(
   return gasEstimate;
 }
 
-export async function callMethod<T>(
-  contract: Contract,
-  methodName: string,
-  args?: any[],
-  overrides?: CallOverrides
-): Promise<T> {
-  const gasEstimate = await getGasEstimate(contract, methodName, args, overrides);
-
-  if (gasEstimate instanceof Error) {
-    throw gasEstimate;
-  }
-
-  return contract[methodName](...(args ?? []), {
-    ...overrides,
-    gasPrice: 0,
-  })
-    .then((response: TransactionResponse) => {
-      return response;
-    })
-    .catch((error: any) => {
-      // if the user rejected the tx, pass this along
-      if (error?.code === 4001) {
-        throw new UserRejectError();
-      } else {
-        // otherwise, the error was unexpected and we need to convey that
-        console.error(`${methodName} failed: ${error.message}`, error, methodName, args);
-        throw new ContractError(methodName, `${methodName} failed: ${error.message}`);
-      }
-    });
+export async function sleep(timeout: number) {
+  await new Promise(resolve => {
+    setTimeout(() => {
+      resolve(undefined);
+    }, timeout);
+  });
 }
 
 export function formatDisplayUnits(
