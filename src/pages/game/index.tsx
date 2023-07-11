@@ -5,6 +5,7 @@ import { useAccount, useSignMessage } from 'wagmi';
 
 import { Board } from '../../components/Board/Board';
 import { tileCount } from '../../components/Board/models/Board';
+import EnsureNetworkButton from '../../components/EnsureNetworkButton';
 import { useGame2048 } from '../../hooks/useGame2048';
 import { useGameBoardById } from '../../hooks/useGameById';
 import { useGameId } from '../../hooks/useGameId';
@@ -45,7 +46,9 @@ const Game: React.FC = () => {
     <Box pb={4}>
       {!signatureValid ? (
         <Box>
-          <Button onClick={signup}>Sign Up</Button>
+          <EnsureNetworkButton>
+            <Button onClick={signup}>Sign Up</Button>
+          </EnsureNetworkButton>
         </Box>
       ) : gameId < 0 || boardState.view.every(number => number === 0) ? (
         <StartGame game2048={game2048} onGameStarted={updateGameId} />

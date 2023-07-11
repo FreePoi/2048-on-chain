@@ -10,7 +10,7 @@ export class TransactionResponse {
   public pollingInterval: number;
   public timeout: number;
 
-  constructor(url: string, transactionHash: string, pollingInterval = 10, timeout = 100 * 1000) {
+  constructor(url: string, transactionHash: string, pollingInterval = 40, timeout = 60 * 1000) {
     this._transactionHash = transactionHash;
     this._url = url;
     this.pollingInterval = pollingInterval;
@@ -39,7 +39,7 @@ export class TransactionResponse {
     return this._receipt;
   }
 
-  async pollReceipt(pollingInterval?: number) {
+  private async pollReceipt(pollingInterval?: number) {
     while (true) {
       try {
         const res = await sendJsonRpc(this._url, {

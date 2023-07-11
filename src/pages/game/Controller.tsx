@@ -3,7 +3,7 @@ import type { TransactionResponse } from '../../core/transaction-response';
 import { LoadingButton } from '@mui/lab';
 import { Box, Grid } from '@mui/material';
 import { BigNumber, ethers } from 'ethers';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useMutation } from 'wagmi';
 
 import { TwentyFortyEight } from '../../core/abis';
@@ -12,7 +12,7 @@ import { getLogArgs } from '../../core/utils';
 import useAlertTransaction from '../../hooks/useAlertTransaction';
 import { useGameId } from '../../hooks/useGameId';
 
-type Direction = 'left' | 'right' | 'top' | 'down';
+type Direction = 'left' | 'right' | 'up' | 'down';
 
 const Controller: React.FC<{
   game2048: Game2048 | null;
@@ -35,7 +35,7 @@ const Controller: React.FC<{
           tx = await game2048.moveLeft(gameId);
         } else if (direction === 'right') {
           tx = await game2048.moveRight(gameId);
-        } else if (direction === 'top') {
+        } else if (direction === 'up') {
           tx = await game2048.moveUp(gameId);
         } else {
           tx = await game2048.moveDown(gameId);
@@ -63,6 +63,64 @@ const Controller: React.FC<{
     },
   });
 
+  const keyUpHandler = useCallback(
+    () => (e: KeyboardEvent) => {
+      console.log('key up', e);
+
+      if (isLoading) {
+        return;
+      }
+
+      switch (e.key) {
+        case 'ArrowUp':
+          move('up');
+          break;
+        case 'ArrowDown':
+          move('down');
+          break;
+        case 'ArrowLeft':
+          move('left');
+          break;
+        case 'ArrowRight':
+          move('right');
+          break;
+        default:
+          break;
+      }
+    },
+    [isLoading, move]
+  );
+  const keyDownHandler = useCallback(
+    () => (e: KeyboardEvent) => {
+      switch (e.key) {
+        case 'ArrowUp':
+        case 'ArrowDown':
+        case 'ArrowLeft':
+        case 'ArrowRight':
+          e.preventDefault();
+          break;
+        default:
+          break;
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    console.log('addEventListener');
+
+    document.addEventListener('keyup', keyUpHandler, false);
+    // Disable arrow keys scroll page
+    document.addEventListener('keydown', keyDownHandler, false);
+
+    return () => {
+      console.log('remove');
+
+      document.removeEventListener('keyup', keyUpHandler, false);
+      document.removeEventListener('keydown', keyDownHandler, false);
+    };
+  }, [keyDownHandler, keyUpHandler]);
+
   return (
     <Box>
       <Grid container>
@@ -71,7 +129,7 @@ const Controller: React.FC<{
           <LoadingButton
             fullWidth
             loading={isLoading}
-            onClick={() => move('top')}
+            onClick={() => move('up')}
             variant="contained"
           >
             UP
